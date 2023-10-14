@@ -1,4 +1,4 @@
-IMAGE_NAME=docker.io/goforbroke1006/debian-python3-chromium-chromedriver
+IMAGE_NAME=docker.io/goforbroke1006/debian-python3-bose-chromium-chromedriver
 
 # https://packages.debian.org/sid/chromium
 CHROME_VERSION=118.0.5993.70-1
