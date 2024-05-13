@@ -1,6 +1,7 @@
 FROM debian:bookworm-slim
 
-RUN apt update && apt upgrade -y
+RUN apt update
+RUN #apt upgrade -y
 
 RUN apt install -y curl unzip
 
@@ -13,6 +14,8 @@ ARG CHROMIUM_DEB_VERSION="${CHROME_VERSION}~deb12u1"
 # http://chromedriver.storage.googleapis.com/ OR https://googlechromelabs.github.io/chrome-for-testing/#stable
 ARG CHROMEDRIVER_VERSION='114.0.5735.90'
 
+RUN #apt list -a chromium-common
+RUN apt-cache madison chromium-common && echo '1'
 RUN apt install -y \
     chromium-common=$CHROMIUM_DEB_VERSION \
     chromium-sandbox=$CHROMIUM_DEB_VERSION \
