@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian:bookworm-20221219-slim
 
 RUN apt update
 RUN #apt upgrade -y
@@ -8,32 +8,27 @@ RUN apt install -y curl unzip
 RUN apt-get install python3.11 python3-pip python3.11-venv -y
 RUN python3 --version
 
-# https://packages.debian.org/sid/chromium
+# https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.198-1_amd64.deb
 ARG CHROME_VERSION='114.0.5735.198-1'
-ARG CHROMIUM_DEB_VERSION="${CHROME_VERSION}~deb12u1"
 # http://chromedriver.storage.googleapis.com/ OR https://googlechromelabs.github.io/chrome-for-testing/#stable
 ARG CHROMEDRIVER_VERSION='114.0.5735.90'
 
-RUN #apt list -a chromium-common
-RUN apt-cache madison chromium-common && echo '1'
-RUN apt install -y \
-    chromium-common=$CHROMIUM_DEB_VERSION \
-    chromium-sandbox=$CHROMIUM_DEB_VERSION \
-    chromium=$CHROMIUM_DEB_VERSION
+RUN apt install -y wget
+RUN wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb \
+      && apt install -y /tmp/chrome.deb \
+      && rm /tmp/chrome.deb
+RUN google-chrome -version
 
 WORKDIR /code/
 
 COPY ./get-chromedriver.sh /get-chromedriver.sh
 RUN mkdir -p /code/build/
-#RUN curl -O -L http://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
-#RUN unzip ./chromedriver_linux64.zip -d /code/build/
-#RUN chmod -R 0777 /code/build/
-#RUN curl -O -L https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROMEDRIVER_VERSION}/linux64/chromedriver-linux64.zip
-#RUN unzip -j ./chromedriver-linux64.zip -d /code/build/
-#RUN chmod -R 0777 /code/build/
 RUN bash /get-chromedriver.sh /code/build/ ${CHROMEDRIVER_VERSION}
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONIOENCODING=utf-8
 ENV PYTHONLEGACYWINDOWSSTDIO=utf-8
 ENV ENV=production
+
+# Chome installed
+# Crome driver for selenium here /code/build/chromedriver
