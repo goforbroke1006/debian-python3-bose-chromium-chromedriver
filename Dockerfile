@@ -10,13 +10,21 @@ RUN python3 --version
 
 #
 
+# https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
 # https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.198-1_amd64.deb
+# https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.198-1_amd64.deb
+# https://storage.googleapis.com/chrome-for-testing-public/114.0.5735.133/linux64/chrome-linux64.zip
 ARG CHROME_VERSION='114.0.5735.198-1'
 
-RUN apt-get install -y wget
-RUN wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb \
-      && apt-get install -y /tmp/chrome.deb \
-      && rm /tmp/chrome.deb
+
+RUN apt-get update
+RUN apt-get install -y libnss3 libxss1 libgconf-2-4 libappindicator1 fonts-liberation xdg-utils
+RUN apt-get install -y libatk-bridge2.0-0
+RUN apt-get install -y libxkbcommon0
+RUN apt-get install -y libasound2
+ADD ./chrome /chrome
+COPY ./get-chrome.sh /get-chrome.sh
+RUN bash /get-chrome.sh ${CHROME_VERSION}
 RUN google-chrome -version
 
 #
@@ -26,9 +34,11 @@ WORKDIR /code/
 # http://chromedriver.storage.googleapis.com/ OR https://googlechromelabs.github.io/chrome-for-testing/#stable
 ARG CHROMEDRIVER_VERSION='114.0.5735.90'
 
+
 COPY ./get-chromedriver.sh /get-chromedriver.sh
 RUN mkdir -p /code/build/
 RUN bash /get-chromedriver.sh /code/build/ ${CHROMEDRIVER_VERSION}
+RUN /code/build/chromedriver --version
 # I download driver right to /code/build/chromedriver because BOSE framework would look for driver in this location.
 
 ENV PYTHONUNBUFFERED=1
@@ -44,6 +54,9 @@ ENV ENV=production
 #
 
 FROM base AS display
+
+RUN mkdir -p /code/build/
+COPY --from=base /code/build/chromedriver /code/build/chromedriver
 
 RUN apt-get update
 RUN apt-get install -y xvfb \

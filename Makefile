@@ -10,9 +10,10 @@ IMAGE_NAME=docker.io/goforbroke1006/debian-python3-bose-chromium-chromedriver
 #image/090: image
 #.PHONY: image/090
 
+# CHROME_VERSION       = 114.0.5735.198-1
 .ONESHELL:
 image/114: PYTHON_VERSION       = 3.11
-image/114: CHROME_VERSION       = 114.0.5735.198-1
+image/114: CHROME_VERSION       = 114.0.5735.133
 image/114: CHROMEDRIVER_VERSION = 114.0.5735.90
 image/114: DOCKERFILE           = ./Dockerfile
 image/114: image
