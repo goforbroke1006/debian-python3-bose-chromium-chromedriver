@@ -7,6 +7,9 @@ CHROME_VERSION=${1:-114.0.5735.133}
 echo "Look for Chrome ${CHROME_VERSION}"
 
 
+
+# All versions here
+# https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json
 if [[ -f /chrome/"${CHROME_VERSION}"/chrome-linux64.zip ]]; then
   echo "INFO: Try install from local files..."
 
@@ -31,33 +34,9 @@ if [[ -f /chrome/"${CHROME_VERSION}"/chrome-linux64.zip ]]; then
 fi
 
 
-
-
-
-# TODO: fix it
-
-#RUN apt-get install -y wget
-#RUN wget --no-verbose -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb \
-#      && apt-get install -y /tmp/chrome.deb \
-#      && rm /tmp/chrome.deb
-#RUN apt-get install -y wget gnupg
-#RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-#RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
-#RUN apt-get update
-#RUN apt-get install -y google-chrome-stable=${CHROME_VERSION}
-#RUN google-chrome -version
-
-
 # All versions here
 # https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json
-
-#
-# Try download from testing-public storage
-#
-echo "Try download from testing-public storage"
-
-# curl -O -L https://storage.googleapis.com/chrome-for-testing-public/114.0.5735.133/linux64/chrome-linux64.zip
-# curl -O -L https://storage.googleapis.com/chrome-for-testing-public/124.0.6367.201/linux64/chrome-linux64.zip
+apt-get install -y curl
 curl -O -L https://storage.googleapis.com/chrome-for-testing-public/"${CHROME_VERSION}"/linux64/chrome-linux64.zip
 if ! unzip -t chrome-linux64.zip >/dev/null; then
   echo "WARN: chrome ${CHROME_VERSION} not found in storage (for-testing-public)"
@@ -73,3 +52,27 @@ else
   rm -rf /desired/location
   rm -f chrome-linux64.zip
 fi
+
+
+
+
+apt-get install -y wget
+# wget --no-verbose -O ./chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.133_amd64.deb
+wget --no-verbose -O ./chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_"${CHROME_VERSION}"_amd64.deb --server-response 2>&1 | tee wget.log
+if grep -q "200 OK" wget.log; then
+  echo "Download from Google downloads page..."
+  apt-get install -y ./chrome.deb
+  rm -f ./chrome.deb
+  google-chrome --version
+  exit 0
+fi
+
+apt-get install -y wget gnupg
+wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+apt-get update
+apt-get install -y google-chrome-stable=${CHROME_VERSION}
+google-chrome --version
+
+
+
